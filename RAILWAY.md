@@ -8,7 +8,7 @@ Use this repo as its **own** Railway service. MySQL is a **separate** Railway pl
 |------|--------|
 | `DATABASE_URL` | Optional if MySQL vars are on the service (see below). When set: `mysql+pymysql://USER:PASSWORD@HOST:PORT/DATABASE?charset=utf8mb4`. Railway’s `mysql://` URL is accepted and normalized at runtime. URL-encode special characters in the password. |
 | `MYSQLHOST`, `MYSQLUSER`, … | When **`DATABASE_URL` is unset**, the API builds the URL from `MYSQLHOST`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLPORT`, `MYSQLDATABASE` (Railway’s MySQL plugin names). Add them via **Variables → Reference** from the MySQL service onto the backend. |
-| `CORS_ORIGINS` | Your **frontend** public origin(s), comma-separated, e.g. `https://your-frontend.up.railway.app` |
+| `CORS_ORIGINS` | Extra allowed browser origins (comma-separated). Defaults already include `localhost` and **`https://*.up.railway.app`** for Railway frontends. Add your domain here if you use a custom host. |
 | `PORT` | Set automatically by Railway; the Dockerfile respects it. |
 | `APP_TOKEN` | **You add this** — one shared secret. Every `/api` request must send `Authorization: Bearer <APP_TOKEN>`. Use the **same** value as frontend `NEXT_PUBLIC_APP_TOKEN`. Leave **empty** only for local dev (no bearer check). |
 | `APP_USER_ID` | Optional. If you have **more than one** row in `users`, set this to the UUID whose data `/api/me` should return (see `GET /api/users`). If there is exactly one user, omit it. |

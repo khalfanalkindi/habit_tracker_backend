@@ -42,9 +42,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_allow_origins(),
+    # Railway PWA origins (https://….up.railway.app) — add more via CORS_ORIGINS if needed
+    allow_origin_regex=r"https://[a-zA-Z0-9-]+\.up\.railway\.app$",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+    # "*" headers + credentials is invalid for browsers; list what the PWA sends
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin"],
 )
 
 app.include_router(auth.router, prefix="/api")
