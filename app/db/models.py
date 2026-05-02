@@ -26,12 +26,12 @@ class User(Base):
     display_name: Mapped[str] = mapped_column(String(255), nullable=False)
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP(6)"), nullable=False
+        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
-        server_default=text("CURRENT_TIMESTAMP(6)"),
-        server_onupdate=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        server_onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
@@ -53,12 +53,12 @@ class FoodOption(Base):
     serving_size: Mapped[float] = mapped_column(Numeric(12, 3), nullable=False)
     serving_unit: Mapped[str] = mapped_column(String(32), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP(6)"), nullable=False
+        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
-        server_default=text("CURRENT_TIMESTAMP(6)"),
-        server_onupdate=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        server_onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
@@ -78,12 +78,12 @@ class FoodLogEntry(Base):
     meal_type: Mapped[str] = mapped_column(String(32), nullable=False)
     quantity: Mapped[float] = mapped_column(Numeric(12, 3), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP(6)"), nullable=False
+        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
-        server_default=text("CURRENT_TIMESTAMP(6)"),
-        server_onupdate=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        server_onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
@@ -105,12 +105,12 @@ class ExerciseEntry(Base):
     )
     completed_on_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP(6)"), nullable=False
+        DateTime(timezone=False), server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
-        server_default=text("CURRENT_TIMESTAMP(6)"),
-        server_onupdate=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        server_onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
