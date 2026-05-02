@@ -1,8 +1,7 @@
-"""Create all tables from SQLAlchemy models (requires DATABASE_URL)."""
+"""Create all tables from SQLAlchemy models (requires DATABASE_URL or MYSQL* env)."""
 
 import os
 from pathlib import Path
-from urllib.parse import quote_plus
 
 from app.config import get_database_url
 from app.db.base import Base
@@ -28,39 +27,18 @@ def _load_dotenv_file() -> None:
             os.environ[key] = value
 
 
-def _coerce_database_url() -> None:
-    """Railway / CLI helpers: accept `mysql://` or discrete MYSQL* vars."""
-    raw = (os.getenv("DATABASE_URL") or "").strip()
-    if raw.startswith("mysql://") and not raw.startswith("mysql+pymysql://"):
-        rest = raw.removeprefix("mysql://")
-        merged = f"mysql+pymysql://{rest}"
-        if "charset=" not in merged:
-            merged += "&charset=utf8mb4" if "?" in merged else "?charset=utf8mb4"
-        os.environ["DATABASE_URL"] = merged
-        return
-
-    if get_database_url():
-        return
-
-    host = os.getenv("MYSQLHOST") or os.getenv("MYSQL_HOST")
-    port = os.getenv("MYSQLPORT") or os.getenv("MYSQL_PORT") or "3306"
-    user = os.getenv("MYSQLUSER") or os.getenv("MYSQL_USER")
-    password = os.getenv("MYSQLPASSWORD") or os.getenv("MYSQL_PASSWORD") or ""
-    database = os.getenv("MYSQLDATABASE") or os.getenv("MYSQL_DATABASE") or "railway"
-    if host and user:
-        u = quote_plus(user, safe="")
-        p = quote_plus(password, safe="")
-        d = quote_plus(database, safe="")
-        os.environ["DATABASE_URL"] = (
-            f"mysql+pymysql://{u}:{p}@{host}:{port}/{d}?charset=utf8mb4"
-        )
+def _sync_database_url_env() -> None:
+    """If URL was inferred from MYSQL* vars, expose it on DATABASE_URL for other tools."""
+    resolved = get_database_url()
+    if resolved and not (os.getenv("DATABASE_URL") or "").strip():
+        os.environ["DATABASE_URL"] = resolved
 
 
 def init_db() -> None:
     if not get_database_url():
         env_hint = _backend_root() / ".env"
         raise SystemExit(
-            "No DATABASE_URL found.\n\n"
+            "No database connection configured.\n\n"
             "Railway's default database name is often `railway` — that only names the DB; "
             "you still need a full connection string (or MYSQL* variables).\n\n"
             f"Create `{env_hint}` with either:\n"
@@ -75,6 +53,6 @@ def init_db() -> None:
 
 if __name__ == "__main__":
     _load_dotenv_file()
-    _coerce_database_url()
+    _sync_database_url_env()
     init_db()
     print("Tables created (or already present).")

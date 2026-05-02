@@ -60,18 +60,28 @@ def custom_openapi() -> dict:
         description=app.description,
         routes=app.routes,
     )
-    openapi_schema.setdefault("components", {}).setdefault("securitySchemes", {})["ApiKeyAuth"] = {
+    schemes = openapi_schema.setdefault("components", {}).setdefault("securitySchemes", {})
+    schemes["ApiKeyAuth"] = {
         "type": "apiKey",
         "in": "header",
         "name": "X-API-Key",
         "description": "Same value as server env `API_STATIC_KEY` (optional in dev if unset).",
+    }
+    schemes["BearerAuth"] = {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Paste only the `access_token` string from POST /api/auth/login (Swagger adds the Bearer prefix).",
     }
     for path, path_item in openapi_schema.get("paths", {}).items():
         if not path.startswith("/api"):
             continue
         for method, op in path_item.items():
             if method in ("get", "post", "put", "delete", "patch") and isinstance(op, dict):
-                op.setdefault("security", [{"ApiKeyAuth": []}])
+                if path.startswith("/api/me"):
+                    op["security"] = [{"ApiKeyAuth": [], "BearerAuth": []}]
+                else:
+                    op["security"] = [{"ApiKeyAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

@@ -6,15 +6,21 @@ Use this repo as its **own** Railway service. MySQL is a **separate** Railway pl
 
 | Name | Purpose |
 |------|--------|
-| `DATABASE_URL` | `mysql+pymysql://USER:PASSWORD@HOST:PORT/DATABASE?charset=utf8mb4` — use Railway MySQL **private** host/port from the plugin variables. URL-encode special characters in the password. |
+| `DATABASE_URL` | Optional if MySQL vars are on the service (see below). When set: `mysql+pymysql://USER:PASSWORD@HOST:PORT/DATABASE?charset=utf8mb4`. Railway’s `mysql://` URL is accepted and normalized at runtime. URL-encode special characters in the password. |
+| `MYSQLHOST`, `MYSQLUSER`, … | When **`DATABASE_URL` is unset**, the API builds the URL from `MYSQLHOST`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLPORT`, `MYSQLDATABASE` (Railway’s MySQL plugin names). Add them via **Variables → Reference** from the MySQL service onto the backend. |
 | `CORS_ORIGINS` | Your **frontend** public origin(s), comma-separated, e.g. `https://your-frontend.up.railway.app` |
 | `PORT` | Set automatically by Railway; the Dockerfile respects it. |
+| `API_STATIC_KEY` | **You add this** — Railway does not create it. Long random string; clients send header `X-API-Key`. Use the **same** value as frontend `NEXT_PUBLIC_API_KEY`. Leave **empty** to disable the check (dev only). |
+| `JWT_SECRET` | **You add this** — secret used to sign login JWTs. |
+| `JWT_EXPIRES_DAYS` | Optional; default `30`. |
+
+The **“8 variables added by Railway”** block (`RAILWAY_PUBLIC_DOMAIN`, etc.) is only Railway metadata — not your app API key. Add **`API_STATIC_KEY`** on the **backend** service: **Variables** → **+ New Variable** → name `API_STATIC_KEY` → value = a secret you generate.
 
 ## Service setup
 
 1. New Railway service → deploy **this** GitHub repo (root = repo root, no subfolder if the repo contains only the backend).
 2. If this repo is **only** `habit_tracker_backend` files at root, leave **Root Directory** empty. If the repo is a monorepo folder, set **Root Directory** to the backend folder name.
-3. Add **MySQL** from Railway’s templates; copy its variables into `DATABASE_URL`.
+3. Add **MySQL** from Railway’s templates; either **reference** its `MYSQL*` variables onto the backend service or set a single `DATABASE_URL`.
 4. **Networking** → generate a public URL for the API (needed for the browser / PWA).
 5. After MySQL exists, **create tables once** (see **Database setup** below).
 
@@ -24,20 +30,22 @@ Railway’s MySQL template **already creates a database** (see variable `MYSQLDA
 
 ### A. Link the backend to MySQL
 
-1. In the **MySQL** service → **Variables** — copy `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`.
-2. In **habit_tracker_backend** → **Variables** → set **`DATABASE_URL`**:
+1. In **habit_tracker_backend** → **Variables** → **+ New Variable** → **Add Reference** (or equivalent) and pull **`MYSQLHOST`**, **`MYSQLUSER`**, **`MYSQLPASSWORD`**, **`MYSQLPORT`**, **`MYSQLDATABASE`** from the MySQL service. The API will build `mysql+pymysql://…` automatically; you do **not** need `DATABASE_URL` unless you prefer one variable.
+
+2. **Alternatively**, set **`DATABASE_URL`** manually:
 
    `mysql+pymysql://USER:PASSWORD@HOST:PORT/MYSQLDATABASE?charset=utf8mb4`
 
    Use the **private** `MYSQLHOST` / `MYSQLPORT` from Railway (service-to-service). If the password has `@`, `#`, `/`, etc., **URL-encode** it.
-3. **Redeploy** the backend so it picks up `DATABASE_URL`.
+
+3. **Redeploy** the backend so it picks up the new variables.
 
 ### B. Create tables (one-time “migration”)
 
 Until you add a migration runner (Alembic, etc.), create tables once:
 
 **Option 1 — SQLAlchemy (no SQL files in the remote repo)**  
-With `DATABASE_URL` set on the backend service:
+With `DATABASE_URL` or referenced `MYSQL*` variables on the backend service:
 
 ```bash
 python3 -m app.db.init_db

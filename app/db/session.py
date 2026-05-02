@@ -12,7 +12,10 @@ from app.config import get_database_url
 def get_engine() -> Engine:
     url = get_database_url()
     if not url:
-        msg = "DATABASE_URL is not set (e.g. mysql+pymysql://user:pass@127.0.0.1:3306/habit_tracker)"
+        msg = (
+            "No database URL: set DATABASE_URL (mysql+pymysql://...) or link MySQL variables "
+            "(MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLPORT, MYSQLDATABASE) on the service."
+        )
         raise RuntimeError(msg)
     return create_engine(url, pool_pre_ping=True)
 
