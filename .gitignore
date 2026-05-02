@@ -10,6 +10,9 @@ build/
 .env
 .env.*
 !.env.example
+# Do not publish SQL migrations / local DB helpers (keep only on your machine).
+/db/
+/scripts/
 .ruff_cache/
 .pytest_cache/
 .coverage
