@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreate(BaseModel):
@@ -17,3 +19,16 @@ class UserCreateResponse(BaseModel):
     email: str
     display_name: str
     username: str
+
+
+class UserListItem(BaseModel):
+    """User row for admin list (no secrets)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    email: str
+    display_name: str
+    username: str
+    created_at: datetime
+    updated_at: datetime

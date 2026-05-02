@@ -33,8 +33,7 @@ def _cors_allow_origins() -> list[str]:
 app = FastAPI(
     title="Habit Tracker API",
     description="Backend for habit / food / exercise tracking. "
-    "Set `X-API-Key` header when `API_STATIC_KEY` is configured. "
-    "User login: `POST /api/auth/login`. Create users via `POST /api/users` in Swagger only.",
+    "Call `POST /api/auth/login` with no auth, then send `Authorization: Bearer <access_token>` on other `/api` routes.",
     version="0.2.0",
 )
 
@@ -61,27 +60,21 @@ def custom_openapi() -> dict:
         routes=app.routes,
     )
     schemes = openapi_schema.setdefault("components", {}).setdefault("securitySchemes", {})
-    schemes["ApiKeyAuth"] = {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-Key",
-        "description": "Same value as server env `API_STATIC_KEY` (optional in dev if unset).",
-    }
     schemes["BearerAuth"] = {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Paste only the `access_token` string from POST /api/auth/login (Swagger adds the Bearer prefix).",
+        "description": "Paste the `access_token` from `POST /api/auth/login` (Swagger adds `Bearer `). Login itself needs no token.",
     }
     for path, path_item in openapi_schema.get("paths", {}).items():
         if not path.startswith("/api"):
             continue
         for method, op in path_item.items():
             if method in ("get", "post", "put", "delete", "patch") and isinstance(op, dict):
-                if path.startswith("/api/me"):
-                    op["security"] = [{"ApiKeyAuth": [], "BearerAuth": []}]
+                if path == "/api/auth/login" and method == "post":
+                    op["security"] = []
                 else:
-                    op["security"] = [{"ApiKeyAuth": []}]
+                    op["security"] = [{"BearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

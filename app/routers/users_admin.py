@@ -2,19 +2,26 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import or_, select
 
 from app.db.models import User
-from app.deps import DbSession, verify_api_key
-from app.schemas.user_admin import UserCreate, UserCreateResponse
+from app.deps import CurrentUser, DbSession
+from app.schemas.user_admin import UserCreate, UserCreateResponse, UserListItem
 from app.security import hash_password
 
-router = APIRouter(prefix="/users", tags=["users-admin"], dependencies=[Depends(verify_api_key)])
+router = APIRouter(prefix="/users", tags=["users-admin"])
+
+
+@router.get("", response_model=list[UserListItem])
+def list_users(_user: CurrentUser, db: DbSession) -> list[User]:
+    """List all users (admin / Swagger)."""
+    stmt = select(User).order_by(User.created_at.desc())
+    return list(db.scalars(stmt).all())
 
 
 @router.post("", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
-def create_user(body: UserCreate, db: DbSession) -> UserCreateResponse:
+def create_user(_user: CurrentUser, body: UserCreate, db: DbSession) -> UserCreateResponse:
     """Create a user (intended for Swagger / ops only — not used by the PWA)."""
     email = str(body.email).strip().lower()
     username_norm = body.username.strip().lower()
