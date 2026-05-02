@@ -10,8 +10,8 @@ Use this repo as its **own** Railway service. MySQL is a **separate** Railway pl
 | `MYSQLHOST`, `MYSQLUSER`, … | When **`DATABASE_URL` is unset**, the API builds the URL from `MYSQLHOST`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLPORT`, `MYSQLDATABASE` (Railway’s MySQL plugin names). Add them via **Variables → Reference** from the MySQL service onto the backend. |
 | `CORS_ORIGINS` | Your **frontend** public origin(s), comma-separated, e.g. `https://your-frontend.up.railway.app` |
 | `PORT` | Set automatically by Railway; the Dockerfile respects it. |
-| `JWT_SECRET` | **You add this** — secret used to sign login JWTs (the only auth secret besides user passwords). |
-| `JWT_EXPIRES_DAYS` | Optional; default `30`. |
+| `APP_TOKEN` | **You add this** — one shared secret. Every `/api` request must send `Authorization: Bearer <APP_TOKEN>`. Use the **same** value as frontend `NEXT_PUBLIC_APP_TOKEN`. Leave **empty** only for local dev (no bearer check). |
+| `APP_USER_ID` | Optional. If you have **more than one** row in `users`, set this to the UUID whose data `/api/me` should return (see `GET /api/users`). If there is exactly one user, omit it. |
 
 The **“8 variables added by Railway”** block (`RAILWAY_PUBLIC_DOMAIN`, etc.) is only Railway metadata.
 

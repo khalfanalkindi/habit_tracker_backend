@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_, select
 
 from app.db.models import User
-from app.deps import DbSession
+from app.deps import DbSession, verify_app_bearer
 from app.schemas.auth import LoginRequest, LoginResponse, UserPublic
-from app.security import create_access_token, verify_password
+from app.security import verify_password
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"], dependencies=[Depends(verify_app_bearer)])
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -23,9 +23,7 @@ def login(body: LoginRequest, db: DbSession) -> LoginResponse:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
         )
-    token = create_access_token(user_id=user.id)
     return LoginResponse(
-        access_token=token,
         user=UserPublic(
             id=user.id,
             email=user.email,
