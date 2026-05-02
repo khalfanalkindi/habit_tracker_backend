@@ -34,18 +34,21 @@ Railway’s MySQL template **already creates a database** (see variable `MYSQLDA
 
 ### B. Create tables (one-time “migration”)
 
-Until you add a migration runner (Alembic, etc.), apply SQL manually once:
+Until you add a migration runner (Alembic, etc.), create tables once:
 
-**Option 1 — TablePlus (or any MySQL client)**  
-1. In the MySQL service on Railway, enable **TCP / public proxy** if you connect from your laptop (Railway shows host, port, user, password).
-2. Connect to the database named in `MYSQLDATABASE`.
-3. Open **`db/init_tables.sql`** from this repo (table-only DDL, no `CREATE DATABASE`) → run the whole script.
+**Option 1 — SQLAlchemy (no SQL files in the remote repo)**  
+With `DATABASE_URL` set on the backend service:
 
-**Option 2 — Full `db/schema.sql` from your machine**  
-That file creates a **separate** database `habit_tracker` and tables inside it. Only use it if your **`DATABASE_URL`** also uses database name `habit_tracker`. If you stay on Railway’s default `MYSQLDATABASE`, use **`init_tables.sql`** instead.
+```bash
+python3 -m app.db.init_db
+```
 
-**Option 3 — Railway shell (if you use the CLI)**  
-With the CLI logged in and linked to the project: `railway connect mysql` (or run a one-off shell), then paste/run `init_tables.sql`.
+That creates tables from `app/db/models.py` (same shapes as your local `db/` SQL, which is **gitignored** and not pushed).
+
+**Option 2 — TablePlus / mysql client**  
+Use your **local** copy of `db/init_tables.sql` or `db/schema.sql` (kept on your machine only) against the Railway database.
+
+**If the database already had an older `users` shape**, use your local **`db/alter_migrate_full_frontend_alignment.sql`** (or the smaller resume scripts in `db/`) once after a backup.
 
 After tables exist, your API can use the DB once you add routes that use SQLAlchemy.
 
