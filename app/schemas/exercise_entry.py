@@ -7,7 +7,9 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # habit_tracker_frontend EXERCISE_TYPES ids
-ALLOWED_EXERCISE_TYPES = frozenset({"gym", "walk", "cardio", "swim", "yoga", "cycling"})
+ALLOWED_EXERCISE_TYPES = frozenset(
+    {"gym", "walk", "cardio", "swim", "yoga", "cycling", "resistance"}
+)
 
 
 def _exercise_type_ok(v: str) -> str:
