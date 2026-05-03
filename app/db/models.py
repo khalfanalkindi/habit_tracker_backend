@@ -47,6 +47,23 @@ class User(Base):
     food_options: Mapped[list["FoodOption"]] = relationship(back_populates="user")
     food_log_entries: Mapped[list["FoodLogEntry"]] = relationship(back_populates="user")
     exercise_entries: Mapped[list["ExerciseEntry"]] = relationship(back_populates="user")
+    password_reset_tokens: Mapped[list["PasswordResetToken"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+class PasswordResetToken(Base):
+    """One-time token for POST /api/auth/reset-password (email link)."""
+
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="password_reset_tokens")
 
 
 class UserProfile(Base):

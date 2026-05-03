@@ -38,3 +38,27 @@ def get_database_url() -> str | None:
         return f"mysql+pymysql://{u}:{p}@{host}:{port}/{d}?charset=utf8mb4"
 
     return None
+
+
+def get_session_max_age_seconds() -> int:
+    """Client session hint returned on login (browser enforces via localStorage)."""
+    raw = (os.getenv("SESSION_MAX_AGE_SECONDS") or "").strip()
+    if raw.isdigit() and int(raw) > 0:
+        return int(raw)
+    return 14 * 24 * 3600
+
+
+def get_password_reset_ttl_hours() -> int:
+    raw = (os.getenv("PASSWORD_RESET_TTL_HOURS") or "").strip()
+    if raw.isdigit() and int(raw) > 0:
+        return int(raw)
+    return 1
+
+
+def get_frontend_password_reset_base_url() -> str:
+    """Origin + path prefix for reset links in emails (no trailing slash)."""
+    return (os.getenv("FRONTEND_PASSWORD_RESET_BASE_URL") or "").strip().rstrip("/")
+
+
+def smtp_configured() -> bool:
+    return bool((os.getenv("SMTP_HOST") or "").strip())

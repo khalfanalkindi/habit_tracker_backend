@@ -21,6 +21,12 @@ class UserCreateResponse(BaseModel):
     username: str
 
 
+class UserSetPasswordBody(BaseModel):
+    """Ops-only: set password without knowing the old one."""
+
+    password: str = Field(..., min_length=8, max_length=256)
+
+
 class UserListItem(BaseModel):
     """User row for admin list (no secrets)."""
 
