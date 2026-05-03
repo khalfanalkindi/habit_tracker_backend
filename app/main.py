@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
-from app.routers import auth, food_log_entries, food_options, me, users_admin
+from app.routers import auth, exercise_entries, food_log_entries, food_options, me, users_admin
 
 DEFAULT_ORIGINS: Sequence[str] = (
     "http://localhost:3000",
@@ -35,7 +35,7 @@ app = FastAPI(
     description="Backend for habit / food / exercise tracking. "
     "Set the same `APP_TOKEN` on the server and `NEXT_PUBLIC_APP_TOKEN` on the frontend. "
     "Send `Authorization: Bearer <that value>` on every `/api` call. "
-    "Send **`X-User-Id`** (user id from login) on `/api/me/*` so profile, food-options, and food-log CRUD target that account. "
+    "Send **`X-User-Id`** (user id from login) on `/api/me/*` so profile, food, and exercise CRUD target that account. "
     "If omitted, `APP_USER_ID` or the only `users` row is used.",
     version="0.2.0",
 )
@@ -55,6 +55,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(me.router, prefix="/api")
 app.include_router(food_options.router, prefix="/api")
 app.include_router(food_log_entries.router, prefix="/api")
+app.include_router(exercise_entries.router, prefix="/api")
 app.include_router(users_admin.router, prefix="/api")
 
 
