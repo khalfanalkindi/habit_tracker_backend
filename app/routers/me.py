@@ -50,8 +50,7 @@ def read_profile(user: CurrentUser, db: DbSession) -> ProfileRead:
 @router.put("/profile", response_model=ProfileRead)
 def update_profile(user: CurrentUser, db: DbSession, body: ProfileUpdate) -> ProfileRead:
     p = _get_or_create_profile(db, user.id)
-    data = body.model_dump(exclude_unset=True)
-    for key in (
+    for name in (
         "height_m",
         "weight_kg",
         "daily_calories_target",
@@ -59,8 +58,8 @@ def update_profile(user: CurrentUser, db: DbSession, body: ProfileUpdate) -> Pro
         "birthday",
         "gender",
     ):
-        if key in data:
-            setattr(p, key, data[key])
+        if name in body.model_fields_set:
+            setattr(p, name, getattr(body, name))
     db.add(p)
     db.flush()
     return _profile_to_read(p)
