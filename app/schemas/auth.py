@@ -39,27 +39,5 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=8, max_length=256, alias="newPassword")
 
 
-class ForgotPasswordRequest(BaseModel):
-    identifier: str = Field(..., min_length=1, max_length=255)
-
-
-class ResetPasswordRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
-
-    token: str = Field(..., min_length=10, max_length=256)
-    new_password: str = Field(..., min_length=8, max_length=256, alias="newPassword")
-
-
 class MessageResponse(BaseModel):
     message: str
-
-
-class ForgotPasswordResponse(BaseModel):
-    model_config = ConfigDict(serialize_by_alias=True)
-
-    message: str
-    reset_link: str | None = Field(
-        default=None,
-        serialization_alias="resetLink",
-        description="Only set when PASSWORD_RESET_RETURN_LINK_IN_RESPONSE=true (local dev).",
-    )
