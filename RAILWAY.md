@@ -11,7 +11,7 @@ Use this repo as its **own** Railway service. MySQL is a **separate** Railway pl
 | `CORS_ORIGINS` | Extra allowed browser origins (comma-separated). Defaults already include `localhost` and **`https://*.up.railway.app`** for Railway frontends. Add your domain here if you use a custom host. |
 | `PORT` | Set automatically by Railway; the Dockerfile respects it. |
 | `APP_TOKEN` | **You add this** — one shared secret. Every `/api` request must send `Authorization: Bearer <APP_TOKEN>`. Use the **same** value as frontend `NEXT_PUBLIC_APP_TOKEN`. Leave **empty** only for local dev (no bearer check). |
-| `APP_USER_ID` | Optional. If you have **more than one** row in `users`, set this to the UUID whose data `/api/me` should return (see `GET /api/users`). If there is exactly one user, omit it. |
+| `APP_USER_ID` | Optional fallback when the client does **not** send `X-User-Id`. If you have several users, the PWA sends **`X-User-Id`** (from login) on `/api/me/*` so profile CRUD hits the right row; you can still set `APP_USER_ID` for tools like curl without that header. |
 
 The **“8 variables added by Railway”** block (`RAILWAY_PUBLIC_DOMAIN`, etc.) is only Railway metadata.
 

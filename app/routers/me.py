@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.db.models import UserProfile
-from app.deps import CurrentUser, DbSession
+from app.deps import CurrentUser, DbSession, verify_app_bearer
 from app.schemas.auth import UserPublic
 from app.schemas.profile import ProfileRead, ProfileUpdate
 
-router = APIRouter(prefix="/me", tags=["me"])
+router = APIRouter(prefix="/me", tags=["me"], dependencies=[Depends(verify_app_bearer)])
 
 
 def _get_or_create_profile(db: Session, user_id: str) -> UserProfile:

@@ -35,7 +35,8 @@ app = FastAPI(
     description="Backend for habit / food / exercise tracking. "
     "Set the same `APP_TOKEN` on the server and `NEXT_PUBLIC_APP_TOKEN` on the frontend. "
     "Send `Authorization: Bearer <that value>` on every `/api` call. "
-    "Optional `APP_USER_ID`: which user `/api/me` uses when more than one row exists in `users`.",
+    "Send **`X-User-Id`** (user id from login) on `/api/me/*` so profile CRUD targets that account. "
+    "If omitted, `APP_USER_ID` or the only `users` row is used.",
     version="0.2.0",
 )
 
@@ -47,7 +48,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
     # "*" headers + credentials is invalid for browsers; list what the PWA sends
-    allow_headers=["Authorization", "Content-Type", "Accept", "Origin"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-User-Id"],
 )
 
 app.include_router(auth.router, prefix="/api")
@@ -68,14 +69,20 @@ def custom_openapi() -> dict:
     schemes["BearerAuth"] = {
         "type": "http",
         "scheme": "bearer",
-        "description": "Same string as server env `APP_TOKEN` (and frontend `NEXT_PUBLIC_APP_TOKEN`).",
+        "description": (
+            "Same string as server env `APP_TOKEN`. For `/api/me/*` also send header "
+            "`X-User-Id: <id>` from the login response so profile routes target that user."
+        ),
     }
     for path, path_item in openapi_schema.get("paths", {}).items():
         if not path.startswith("/api"):
             continue
         for method, op in path_item.items():
             if method in ("get", "post", "put", "delete", "patch") and isinstance(op, dict):
-                op["security"] = [{"BearerAuth": []}]
+                if path == "/api/auth/login" and method == "post":
+                    op["security"] = []
+                else:
+                    op["security"] = [{"BearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
