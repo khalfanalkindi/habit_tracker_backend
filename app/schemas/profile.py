@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProfileRead(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     height_m: float | None = Field(None, alias="heightM")
     weight_kg: float | None = Field(None, alias="weightKg")
@@ -17,7 +17,7 @@ class ProfileRead(BaseModel):
 
 
 class ProfileUpdate(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True, extra="ignore")
 
     height_m: float | None = Field(None, alias="heightM")
     weight_kg: float | None = Field(None, alias="weightKg")
